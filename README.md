@@ -50,9 +50,6 @@ The project layout includes:
 * 📁 .dlt/ – holds secrets and metadata (like credentials), fully compatible with OSS dlt
 * 💾 _data/ – used for pipeline state and local files (automatically excluded from Git)
 
-```shell
-mv dlt_portable_data_lake_demo/.dlt/example.secrets.toml dlt_portable_data_lake_demo/.dlt/secrets.toml
-```
 Now that you're familiar with the structure, let’s put it into action by defining our first data source!
 
 We’ll be using the famous [jaffle-shop](https://github.com/dbt-labs/jaffle-shop) dataset – a mock e-commerce store that’s perfect for data modeling fun.
