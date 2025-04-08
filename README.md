@@ -50,8 +50,6 @@ The project layout includes:
 * 📁 .dlt/ – holds secrets and metadata (like credentials), fully compatible with OSS dlt
 * 💾 _data/ – used for pipeline state and local files (automatically excluded from Git)
 
-dlt+ Project requires license. To enable trial 2 week license, rename the `example.secrets.toml` to `secrets.toml` 
-
 ```shell
 mv dlt_portable_data_lake_demo/.dlt/example.secrets.toml dlt_portable_data_lake_demo/.dlt/secrets.toml
 ```
