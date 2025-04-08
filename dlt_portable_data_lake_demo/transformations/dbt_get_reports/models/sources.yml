@@ -1,0 +1,130 @@
+version: 2
+sources:
+  - name: raw_data
+    schema: '{{ var ("source_dataset_name") }}'
+    tables:
+      - name: _dlt_loads
+      - name: customers
+      - name: items
+      - name: products
+      - name: supplies
+      - name: stores
+      - name: orders
+      - name: orders__items
+  - name: transformed_data
+    schema: '{{ var ("destination_dataset_name") }}'
+    tables:
+      - name: dlt_processed_load_ids
+
+models:
+      - name: dlt_processed_load_ids
+        description: "This table contains all processed load ids for incremental loading"
+      - name: _dlt_loads
+        description: "Created by DLT. Tracks completed loads"
+        columns:
+          - name: load_id
+            tests:
+              - not_null
+          - name: schema_name
+          - name: status
+            tests:
+              - not_null
+          - name: inserted_at
+            tests:
+              - not_null
+          - name: schema_version_hash
+      - name: customers
+        columns:
+          - name: id
+          - name: name
+          - name: _dlt_load_id
+            tests:
+              - not_null
+          - name: _dlt_id
+            tests:
+              - not_null
+              - unique
+      - name: items
+        columns:
+          - name: id
+          - name: order_id
+          - name: sku
+          - name: _dlt_load_id
+            tests:
+              - not_null
+          - name: _dlt_id
+            tests:
+              - not_null
+              - unique
+      - name: products
+        columns:
+          - name: sku
+          - name: name
+          - name: type
+          - name: price
+          - name: description
+          - name: _dlt_load_id
+            tests:
+              - not_null
+          - name: _dlt_id
+            tests:
+              - not_null
+              - unique
+      - name: supplies
+        columns:
+          - name: id
+          - name: name
+          - name: cost
+          - name: perishable
+          - name: sku
+          - name: _dlt_load_id
+            tests:
+              - not_null
+          - name: _dlt_id
+            tests:
+              - not_null
+              - unique
+      - name: stores
+        columns:
+          - name: id
+          - name: name
+          - name: opened_at
+          - name: tax_rate
+          - name: _dlt_load_id
+            tests:
+              - not_null
+          - name: _dlt_id
+            tests:
+              - not_null
+              - unique
+      - name: orders
+        columns:
+          - name: id
+          - name: customer_id
+          - name: store_id
+          - name: ordered_at
+          - name: subtotal
+          - name: tax_paid
+          - name: order_total
+          - name: _dlt_load_id
+            tests:
+              - not_null
+          - name: _dlt_id
+            tests:
+              - not_null
+              - unique
+      - name: orders__items
+        columns:
+          - name: id
+          - name: order_id
+          - name: sku
+          - name: _dlt_parent_id
+            tests:
+              - not_null
+          - name: _dlt_list_idx
+            tests:
+              - not_null
+          - name: _dlt_id
+            tests:
+              - not_null
+              - unique

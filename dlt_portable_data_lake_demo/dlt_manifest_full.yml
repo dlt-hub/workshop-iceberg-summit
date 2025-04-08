@@ -1,0 +1,107 @@
+sources:
+  jaffle_shop:
+    type: rest_api
+    client:
+      base_url: https://jaffle-shop.dlthub.com/api/v1
+      paginator: auto
+    resource_defaults:
+      write_disposition: replace
+    resources:
+      - customers
+      - items
+      - products
+      - supplies
+      - stores
+      -
+        name: orders
+        endpoint:
+          path: orders
+          params:
+            start_date:
+              type: incremental
+              cursor_path: ordered_at
+        write_disposition: append
+
+destinations:
+  iceberg_lake:
+    type: iceberg
+    catalog_type: sql
+  warehouse:
+    type: duckdb
+
+pipelines:
+  api_to_lake:
+    source: jaffle_shop
+    destination: iceberg_lake
+    dataset_name: jaffle_shop_dataset
+    progress: log
+
+datasets:
+  jaffle_shop_dataset:
+    destination:
+      - iceberg_lake
+  reports_dataset:
+    destination:
+      - warehouse
+
+profiles:
+  dev: &dev_profile
+    destinations:
+      iceberg_lake:
+        credentials:
+          drivername: sqlite
+          database: catalog.db
+        capabilities:
+          register_new_tables: true
+        filesystem:
+          bucket_url: raw_data
+  prod:
+    destinations:
+      iceberg_lake:
+        catalog_type: rest
+        credentials:
+          uri: http://localhost:8181/catalog
+          warehouse: demo_wh
+        capabilities:
+          # where on s3 tables will be created. note that this must match bucket and key prefix on Lakekeeper
+          # you may also use absolute uri: including s3://bucket
+          table_location_layout: "s3://demo/new_location/lakekeeper_demo_4/{dataset_name}/{table_name}"
+  access:
+    <<: *dev_profile
+    datasets: &dataset_contracts
+      jaffle_shop_dataset:
+        # no new tables, no column changes
+        contract: freeze
+
+runtime:
+  dlthub_telemetry: off
+  log_level: WARNING
+
+transformations:
+  get_reports:
+    engine: dbt
+    cache: duckdb_local
+
+caches:
+  duckdb_local:
+    inputs:
+      - dataset: jaffle_shop_dataset
+        tables:
+          customers: customers
+          items: items
+          products: products
+          supplies: supplies
+          stores: stores
+          orders: orders
+          orders__items: orders__items
+    outputs:
+      - dataset: reports_dataset
+        tables:
+          dim__dlt_loads: dim__dlt_loads
+          dim_customers: dim_customers
+          dim_items: dim_items
+          dim_orders: dim_orders
+          dim_orders__items: dim_orders__items
+          dim_products: dim_products
+          dim_stores: dim_stores
+          dim_supplies: dim_supplies

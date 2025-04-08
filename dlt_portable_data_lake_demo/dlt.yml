@@ -1,0 +1,59 @@
+sources:
+  jaffle_shop:
+    type: rest_api
+    client:
+      base_url: # Insert API base URL here
+      paginator: auto
+    resource_defaults:
+      write_disposition: replace
+    resources:
+      - customers
+      - # Add 4 more bulk endpoints
+      -
+        name: orders
+        endpoint:
+          path: orders
+          params:
+            start_date:
+              type: incremental
+              cursor_path: # What field in the response contains the timestamp?
+        write_disposition: append
+
+destinations:
+  iceberg_lake:
+    type: iceberg
+    catalog_type: sql
+
+pipelines:
+  api_to_lake:
+    source: jaffle_shop
+    destination: iceberg_lake
+    dataset_name: jaffle_shop_dataset
+    progress: log
+
+datasets:
+  jaffle_shop_dataset:
+    destination:
+      - iceberg_lake
+
+profiles:
+  dev: &dev_profile
+    destinations:
+      iceberg_lake:
+        credentials:
+          drivername: sqlite
+          database: catalog.db
+        capabilities:
+          register_new_tables: true
+        filesystem:
+          bucket_url: raw_data
+  access:
+    <<: *dev_profile
+    datasets: &dataset_contracts
+      jaffle_shop_dataset:
+        # no new tables, no column changes
+        contract: freeze
+
+runtime:
+  dlthub_telemetry: off
+  log_level: WARNING

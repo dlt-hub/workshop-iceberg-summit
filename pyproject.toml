@@ -1,0 +1,60 @@
+[project]
+name = "dlt-portable-data-lake-demo"
+version = "0.1.3"
+description = "A dlt package with a demo of portable data lake on Delta tables"
+readme = "README.md"
+license = { file = "LICENSE.md" }
+requires-python = ">=3.10"
+
+dependencies = [
+    "dlt[duckdb,parquet,deltalake,filesystem,snowflake,pyiceberg]==1.9.1a0",
+    "dlt-plus[dbt,mcp]==0.9.1a0",
+    "enlighten",
+    "duckdb>=1.2.0",
+    "arrow>=1.3.0",
+    "pandas>=2.2.3",
+    "numpy>1.24.4",
+    "pyarrow>=17.0.0",
+    "ibis-framework[duckdb]>=10.0.0",
+]
+
+
+[dependency-groups]
+dev = [
+    "dlt-plus-tests>=0.7.0",
+    "ipykernel",
+    "jupyter",
+    "streamlit",
+    "ruff>=0.2.1",
+    "mypy>=1.8.0",
+]
+
+[project.entry-points.dlt_package]
+dlt-project = "dlt_portable_data_lake_demo"
+
+[[tool.uv.index]]
+name = "dlt-hub"
+url = "https://pypi.dlthub.com"
+explicit = true
+
+[tool.uv.sources]
+dlt-plus-tests = { index = "dlt-hub" }
+
+[tool.pytest.ini_options]
+norecursedirs = ".env .eggs build dist"
+addopts = "-v --showlocals --durations 10"
+xfail_strict = true
+log_cli = 1
+log_cli_level = "INFO"
+filterwarnings = "ignore::DeprecationWarning"
+
+[tool.hatch.build.targets.sdist]
+packages = ["dlt_portable_data_lake_demo"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["dlt_portable_data_lake_demo"]
+
+
+[build-system]
+requires = ["hatchling>=1.20.0"]
+build-backend = "hatchling.build"
